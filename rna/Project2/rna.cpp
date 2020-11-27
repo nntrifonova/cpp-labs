@@ -5,6 +5,67 @@
 
 using namespace std;
 
+Nucleotide rna::get_nucl(int ind)
+{
+	if (ind < 0 || ind>this->nucl_num) {
+		exit(0);
+	}
+
+	int p_1 = ind / (4 * sizeof(size_t));
+	int p_2 = ind % (4 * sizeof(size_t));
+
+	size_t tmp = this->rna_arr[p_1];
+	tmp >>= 2 * (sizeof(size_t) * 4 - p_2);
+	tmp &= 3;
+
+	switch (tmp) {
+	case(0):
+		return A;
+	case(1):
+		return G;
+	case(2):
+		return C;
+	case(3):
+		return T;
+	}
+	exit(0);
+}
+
+void rna::insert(Nucleotide nucl, int ind)
+{
+	size_t letter;
+	switch (nucl) {
+	case(A):
+		letter = 0;
+	case(G):
+		letter = 1;
+	case(C):
+		letter = 2;
+	case(T):
+		letter = 3;
+	}
+
+	if (ind = -1) {
+		for (int i = 0; i < this->nucl_num; i++) {
+			int p_1 = i / (4 * sizeof(size_t));
+			int p_2 = i % (4 * sizeof(size_t));
+
+			letter <<= (sizeof(size_t) * 8) - p_2 * 2 - 2;
+			size_t tmp = this->rna_arr[p_1];
+			tmp |= letter;
+			this->rna_arr[p_1] = tmp;
+		}
+	}
+	else {
+		int bit_n = ind % 4 * sizeof(size_t);
+		int pos = ind / (4 * sizeof(size_t));
+		size_t shift = 8 * sizeof(size_t) - 2 - bit_n * 2;
+		size_t mask = (size_t)3 << (shift);
+		size_t tmp = this->rna_arr[pos];
+		this->rna_arr[pos] = (this->rna_arr[pos] & (~mask)) | (letter << shift);
+	}
+}
+
 
 rna::rna()
 {
@@ -21,30 +82,6 @@ int rna::count_capacity(int numb)
 	return (numb % 4 == 0 ? numb / 4 : numb / 4 + 1);
 }
 
-void rna::insert(Nucleotide nucl)
-{
-	size_t letter;
-	switch (nucl) {
-	case(A):
-		letter = 0;
-	case(G):
-		letter = 1;
-	case(C):
-		letter = 2;
-	case(T):
-		letter = 3;
-	}
-	
-	for (int i = 0; i < this->nucl_num; i++) {
-		int p_1 = i / (4 * sizeof(size_t));
-		int p_2 = i % (4 * sizeof(size_t));
-
-		letter <<= (sizeof(size_t) * 8) - p_2 * 2 - 2;
-		size_t tmp = this->rna_arr[p_1];
-		tmp |= letter;
-	}
-}
-
 rna::rna(int numb)
 {
 	nucl_num = numb;
@@ -57,42 +94,21 @@ rna::rna(Nucleotide nucl, int numb)
 	nucl_num = numb;
 	capacity = count_capacity(numb);
 	rna_arr = new size_t[capacity];
-	insert(nucl);
+	insert(nucl, -1);
 }
 rna::~rna()
 {
 	delete[] rna_arr;
 }
 
-Nucleotide rna::get_nucl(int ind)
+reference rna::operator[](int ind)
 {
-	if (ind < 0 || ind>this->nucl_num){
-		exit(0);
-	}
-
-	int p_1 = ind / (4 * sizeof(size_t));
-	int p_2 = ind % (4 * sizeof(size_t));
-
-	size_t tmp = this->rna_arr[p_1];
-	tmp >>= 2 *(sizeof(size_t)*4 - p_2);
-	tmp &= 3;
-
-	switch (tmp) {
-	case(0):
-		return A;
-	case(1):
-		return G;
-	case(2):
-		return C;
-	case(3):
-		return T;
-	}
-	exit(0);
+	return reference(ind, this);
 }
 
-reference rna::operator[](int index)
+reference_const rna::operator[](int ind) const
 {
-	return reference(return reference(index, this));
+	return reference_const(ind, this);
 }
 
 rna operator+(const rna & rna1, const rna & rna2)
@@ -136,15 +152,7 @@ bool operator==(const rna & nucl_1, const rna & nucl_2)
 
 bool operator!=(const rna & nucl_1, const rna & nucl_2)
 {
-	if (nucl_1.nucl_num != nucl_2.nucl_num) {
-		return true;
-	}
-	for (int i = 0; i < nucl_1.capacity; i++) {
-		if (nucl_1.rna_arr[i] != nucl_2.rna_arr[i]) {
-			return true;
-		}
-	}
-	return false;
+	return !(nucl_1 == nucl_2);
 }
 
 rna operator!(const rna &rna1)
@@ -184,3 +192,7 @@ bool is_complimentary(const rna & rna1, const rna & rna2)
 	return false;
 }
 
+void rna::reference::operator=(Nucleotide nucl)
+{
+
+}

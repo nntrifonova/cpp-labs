@@ -4,12 +4,15 @@
 #define RNA_RNA_H
 
 enum Nucleotide { A, G, C, T };
+
 class rna
 {
 private:
 	int nucl_num;
 	int  capacity;
 	size_t* rna_arr;
+	void insert(Nucleotide nucl, int ind);
+	Nucleotide get_nucl(int ind);
 	class reference {
 	private:
 		int num;
@@ -20,8 +23,8 @@ private:
 			rna_array = rna_ar;
 		}
 		void operator=(Nucleotide nucl) {
-
-		};
+			return (*rna_array).insert(nucl, num);
+		}
 		operator Nucleotide() const {
 			return (Nucleotide)(*rna_array).get_nucl(num);
 		}
@@ -43,12 +46,12 @@ private:
 public:
 	rna();
 	int count_capacity(int numb);
-	void insert(Nucleotide nucl);
 	rna(int numb);
 	rna(Nucleotide nucl, int nucl_num);
 	virtual ~rna();
-	Nucleotide get_nucl(int ind);
 
+	reference operator [](int ind);
+	reference_const operator [](int ind) const;
 	friend rna operator+(const rna &rna1, const rna &rna2);
 	friend bool operator == (const rna& nucl_1, const rna& nucl_2);
 	friend bool operator != (const rna& nucl_1, const rna& nucl_2);
