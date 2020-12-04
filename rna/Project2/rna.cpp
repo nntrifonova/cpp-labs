@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Nucleotide rna::get_nucl(int ind)
+int rna::get_nucl(int ind) const
 {
 	if (ind < 0 || ind>this->nucl_num) {
 		exit(0);
@@ -101,14 +101,15 @@ rna::~rna()
 	delete[] rna_arr;
 }
 
-reference rna::operator[](int ind)
+rna::reference rna::operator[] (int ind) 
 {
-	return reference(ind, this);
+	reference ref(ind, this);
+	return ref;
 }
 
-reference_const rna::operator[](int ind) const
+rna::const_reference rna::operator[](int ind) const
 {
-	return reference_const(ind, this);
+	return const_reference(ind, this);
 }
 
 rna operator+(const rna & rna1, const rna & rna2)
@@ -190,9 +191,4 @@ bool is_complimentary(const rna & rna1, const rna & rna2)
 		return true;
 	}
 	return false;
-}
-
-void rna::reference::operator=(Nucleotide nucl)
-{
-
 }
